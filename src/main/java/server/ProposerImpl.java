@@ -4,6 +4,7 @@ import logging.Logger;
 
 import java.util.HashSet;
 
+/** Implements RemoteProposer interface. */
 public class ProposerImpl implements RemoteProposer {
   private final int uid;
   int proposalID = 0;

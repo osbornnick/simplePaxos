@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+/** Implements RemoteLearner interface */
 public class LearnerImpl implements RemoteLearner {
 
   /** Object representing a proposal, for easy storage of proposals in a map. */

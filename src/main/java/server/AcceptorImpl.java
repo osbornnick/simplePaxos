@@ -2,6 +2,7 @@ package server;
 
 import logging.Logger;
 
+/** Implements RemoteAcceptor interface */
 public class AcceptorImpl implements RemoteAcceptor {
 
   private final int uid;

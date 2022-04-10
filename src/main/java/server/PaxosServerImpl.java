@@ -62,6 +62,12 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
     return true;
   }
 
+  /**
+   * Start the PAXOS algorithm with the proposed operation
+   *
+   * @param op the proposed operation
+   * @throws RemoteException rmi
+   */
   private void startPaxos(Operation op) throws RemoteException {
     this.setProposal(op);
     this.prepare();
@@ -91,14 +97,14 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
 
   @Override
   public void receivePrepare(int fromUID, int proposal) throws RemoteException {
-    this.failAcceptor();
+    this.maybeFailAcceptor();
     this.acceptor.receivePrepare(fromUID, proposal);
   }
 
   @Override
   public void receiveAcceptRequest(int proposal, Operation op) throws RemoteException {
     logger.log("Acceptor receiving for proposal %d", proposal);
-    this.failAcceptor();
+    this.maybeFailAcceptor();
     this.acceptor.receiveAcceptRequest(proposal, op);
   }
 
@@ -109,7 +115,7 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
   }
 
   /** with a 1/10 chance, restart this servers acceptor */
-  private void failAcceptor() {
+  private void maybeFailAcceptor() {
     if (Math.random() < 0.1) {
       logger.log("Pseudo-failing Acceptor");
       this.acceptor = new AcceptorImpl(this.serverID, logger, courier);

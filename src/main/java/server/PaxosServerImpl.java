@@ -79,12 +79,14 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
 
     @Override
     public void receivePrepare(int fromUID, int proposal) throws RemoteException {
+        this.failAcceptor();
         this.acceptor.receivePrepare(fromUID, proposal);
     }
 
     @Override
     public void receiveAcceptRequest(int proposal, Operation op) throws RemoteException {
         logger.log("Acceptor receiving for proposal %d", proposal);
+        this.failAcceptor();
         this.acceptor.receiveAcceptRequest(proposal, op);
     }
 
@@ -92,5 +94,15 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
     public void receiveAccepted(int uid, int proposal, Operation op) throws RemoteException {
         logger.log("Learner receiving from %s for proposal %d", uid, proposal);
         this.learner.receiveAccepted(uid, proposal, op);
+    }
+
+    /**
+     * with a 1/10 chance, restart this servers acceptor
+     */
+    private void failAcceptor() {
+        if (Math.random() < 0.1) {
+            logger.log("Pseudo-failing Acceptor");
+            this.acceptor = new AcceptorImpl(this.serverID, logger, courier);
+        }
     }
 }

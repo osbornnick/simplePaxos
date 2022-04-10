@@ -40,12 +40,6 @@ public class Client {
             System.out.printf("Could not connect to servers, are they running? error: %s%n", e.getMessage());
             System.exit(1);
         }
-//        try {
-//            System.out.println(servers.get(0).put("testKey", "testValue"));
-//            System.out.println(servers.get(1).get("testKey"));
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//        }
 
         prepopulate(servers);
         test(servers);

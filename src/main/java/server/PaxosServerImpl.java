@@ -5,6 +5,10 @@ import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentHashMap;
 import logging.Logger;
 
+/**
+ * Implements the Server interface with PAXOS extension. Delegates PAXOS implementation to composed
+ * Proposer, Acceptor, and Learner.
+ */
 public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, RemoteLearner {
 
   int serverID;
@@ -20,9 +24,10 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
     this.courier = courier;
     this.map = new ConcurrentHashMap<>();
     logger = new Logger(PaxosServerImpl.class.getName() + id);
-    this.proposer = new ProposerImpl(id, logger, courier, 3);
+    int quorumSize = 3;
+    this.proposer = new ProposerImpl(id, logger, courier, quorumSize);
     this.acceptor = new AcceptorImpl(id, logger, courier);
-    this.learner = new LearnerImpl(logger, 3, map);
+    this.learner = new LearnerImpl(logger, quorumSize, map);
   }
 
   @Override
@@ -40,8 +45,7 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
               map.put(key, value);
               return true;
             };
-    this.setProposal(op);
-    this.prepare();
+    this.startPaxos(op);
     return true;
   }
 
@@ -54,9 +58,13 @@ public class PaxosServerImpl implements Server, RemoteProposer, RemoteAcceptor, 
               map.remove(key);
               return true;
             };
+    this.startPaxos(op);
+    return true;
+  }
+
+  private void startPaxos(Operation op) throws RemoteException {
     this.setProposal(op);
     this.prepare();
-    return true;
   }
 
   @Override

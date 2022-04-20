@@ -9,6 +9,9 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Scanner;
 
 public class Client {
     private static Logger logger;
@@ -43,7 +46,12 @@ public class Client {
 
         prepopulate(servers);
         test(servers);
-
+        System.out.println("Pre-population & test operations run, entering interactive mode...");
+        try {
+            interactive(servers);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private static int randomInt() {
@@ -139,5 +147,65 @@ public class Client {
                                 e.printStackTrace();
                             }
                         });
+    }
+
+    private static void interactive(ArrayList<Server> servers) throws RemoteException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("--Interactive mode--");
+        System.out.printf("Instructions: %nEnter one of the below commands. A server will be chosen randomly to respond to your request. All key/values are case-sensitive%n");
+        System.out.printf("Command options:%n");
+        printCommand("GET [key]", "get the value for an associated key from the replicated store");
+        printCommand("PUT [key] [value]", "put a key value pair into the replicated store");
+        printCommand("DELETE [key]", "delete a key value pair from the replicated store");
+        System.out.println("--");
+        System.out.print("> ");
+        String cmd = "";
+        int choice;
+        while (!Objects.equals(cmd = scanner.nextLine(), "STOP")) {
+            String[] cmdParts = cmd.split(" ");
+            if (cmdParts.length < 1) {
+                System.out.println("Please enter a command");
+            } else {
+                switch (cmdParts[0].toUpperCase()) {
+                    case "STOP":
+                        return;
+                    case "GET":
+                        if (cmdParts.length != 2) System.out.println("incorrect number of arguments, correct syntax is GET [key]");
+                        else {
+                            choice = new Random().nextInt(servers.size());
+                            Server s = servers.get(choice);
+                            System.out.printf("Issuing request %s to server %d%n", Arrays.toString(cmdParts), choice);
+                            String response = s.get(cmdParts[1]);
+                            System.out.printf("Response: %s%n", response);
+                        }
+                        break;
+                    case "PUT":
+                        if (cmdParts.length != 3) System.out.println("incorrect number of arguments, correct syntax is PUT [key] [value]");
+                        else {
+                            choice = new Random().nextInt(servers.size());
+                            Server s = servers.get(choice);
+                            System.out.printf("Issuing request %s to server %d%n", Arrays.toString(cmdParts), choice);
+                            System.out.printf("Response: %s%n", s.put(cmdParts[1], cmdParts[2]));
+                        }
+                        break;
+                    case "DELETE":
+                        if (cmdParts.length != 2) System.out.println("incorrect number of arguments, correct syntax is DELETE [key]");
+                        else {
+                            choice = new Random().nextInt(servers.size());
+                            Server s = servers.get(choice);
+                            System.out.printf("Issuing request %s to server %d%n", Arrays.toString(cmdParts), choice);
+                            System.out.printf("Response: %s%n", s.delete(cmdParts[1]));
+                        }
+                        break;
+                    default:
+                        System.out.printf("Unrecognized command '%s', recognized commands are STOP PUT GET DELETE%n", cmdParts[0]);
+                }
+            }
+            System.out.print("> ");
+        }
+    }
+
+    private static void printCommand(String cmd, String details) {
+        System.out.printf("%-20s %s%n", cmd, details);
     }
 }

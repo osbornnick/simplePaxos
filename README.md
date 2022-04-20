@@ -11,9 +11,11 @@ Run the server:
 > java -jar ./out/server.jar port
 
 Run the client in a separate terminal:
-> java -jar ./out/server.jar hostname port
+> java -jar ./out/client.jar hostname port
 
 N.B. If testing this software on a single machine, use `localhost` as the hostname and any later port, I usually use port `32000`.
+
+After the client pre-populates the data store, and issues a series of test commands, it enters interactive mode. You can enter get/put/delete commands from the terminal to execute them on the server cluster. Follow the instructions in your terminal.
 
 Once the client completes, end the server process with a keyboard interrupt - `Ctrl-c`.
 
